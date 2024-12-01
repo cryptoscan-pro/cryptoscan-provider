@@ -1,20 +1,36 @@
 {
   "name": "cryptoscan-provider",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "WebSocket data provider for cryptoscanning",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prepare": "npm run clean && npm run build"
   },
-  "keywords": [],
+  "keywords": [
+    "websocket",
+    "crypto",
+    "provider"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "typescript": "^5.7.2"
+    "uuid": "^9.0.0",
+    "ws": "^8.16.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.1",
-    "@types/uuid": "^10.0.0"
+    "@types/uuid": "^10.0.0",
+    "@types/ws": "^8.5.10",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }
