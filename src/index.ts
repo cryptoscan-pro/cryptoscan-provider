@@ -1,6 +1,8 @@
 import { v5 as uuidv5 } from 'uuid';
 import WebSocket from 'ws';
 
+const WS_URL = process.env.WS_URL || 'ws://localhost:8080';
+
 interface DataObject {
   [key: string]: string | number;
   key: string;
@@ -23,7 +25,7 @@ export function processData(data: DataObject): string {
       types: valueTypes.join(',')
     }).toString();
 
-    wsConnection = new WebSocket(`ws://your-websocket-server/ws?${queryParams}`);
+    wsConnection = new WebSocket(`${WS_URL}/ws?${queryParams}`);
     
     wsConnection.onopen = () => {
       const values = objectKeys.map(key => data[key]).join(',');
