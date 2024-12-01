@@ -1,6 +1,6 @@
 import "dotenv/config"
 import { v5 as uuidv5 } from 'uuid';
-import WebSocket from 'ws';
+import WebSocketReconnect from "@javeoff/ws-reconnect";
 
 const WS_URL = process.env.PROVIDER_API_URL || 'ws://localhost:8080';
 
@@ -9,36 +9,45 @@ interface DataObject {
   key: string;
 }
 
-let wsConnection: WebSocket | null = null;
+let wsConnection: WebSocketReconnect | null = null;
 let objectKeys: string[] = [];
 let valueTypes: string[] = [];
 let isFirstRun = true;
 
 const NAMESPACE = '1b671a64-40d5-491e-99b0-da01ff1f3341';
 
-export default function processData(data: DataObject): string {
+export default function processData(data: DataObject) {
+  if (!WS_URL) {
+    return;
+  }
+
+  if (!data.key) {
+    throw new Error('Key is required');
+  }
+
+  const id = uuidv5(data.key, NAMESPACE);
+
   if (isFirstRun) {
-    objectKeys = Object.keys(data);
-    valueTypes = objectKeys.map(key => typeof data[key]);
+    objectKeys = ['id', ...Object.keys(data)];
+    valueTypes = ['string', ...objectKeys.map(key => typeof data[key])];
 
     const queryParams = new URLSearchParams({
       keys: objectKeys.join(','),
       types: valueTypes.join(',')
     }).toString();
 
-    wsConnection = new WebSocket(`${WS_URL}/ws?${queryParams}`);
+    wsConnection = new WebSocketReconnect(`${WS_URL}/ws?${queryParams}`);
     
-    wsConnection.onopen = () => {
+    wsConnection.on('open', () => {
       const values = objectKeys.map(key => data[key]).join(',');
       wsConnection?.send(values);
-    };
+    })
 
     isFirstRun = false;
-  } else if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+  } else if (wsConnection) {
     const values = objectKeys.map(key => data[key]).join(',');
-    wsConnection.send(values);
+    wsConnection.send([id, ...values]);
   }
 
-  const id = uuidv5(data.key, NAMESPACE);
   return id;
 }
