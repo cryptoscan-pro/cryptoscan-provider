@@ -15,7 +15,7 @@ let isFirstRun = true;
 
 const NAMESPACE = '1b671a64-40d5-491e-99b0-da01ff1f3341';
 
-export function processData(data: DataObject): string {
+export default function processData(data: DataObject): string {
   if (isFirstRun) {
     objectKeys = Object.keys(data);
     valueTypes = objectKeys.map(key => typeof data[key]);
