@@ -1,7 +1,8 @@
+import "dotenv/config"
 import { v5 as uuidv5 } from 'uuid';
 import WebSocket from 'ws';
 
-const WS_URL = process.env.WS_URL || 'ws://localhost:8080';
+const WS_URL = process.env.PROVIDER_API_URL || 'ws://localhost:8080';
 
 interface DataObject {
   [key: string]: string | number;
