@@ -1,6 +1,9 @@
 # Cryptoscan Provider
 
-WebSocket data provider library for real-time crypto data scanning and processing.
+Important! This is not for public use. Use only if you are a Cryptoscan partner.
+
+WebSocket data provider library for real-time load data to Cryptoscan API.
+This library was created for integration with the [cryptoscan.pro](https://cryptoscan.pro) partners.
 
 ## Installation
 
