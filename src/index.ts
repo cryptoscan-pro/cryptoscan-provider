@@ -37,16 +37,16 @@ export default function processData(data: DataObject) {
     }).toString();
 
     wsConnection = new WebSocketReconnect(`${WS_URL}/ws?${queryParams}`);
-    
+
     wsConnection.on('open', () => {
-      const values = objectKeys.map(key => data[key]).join(',');
+      const values = [id, ...objectKeys].map(key => data[key]).join(',');
       wsConnection?.send(values);
     })
 
     isFirstRun = false;
   } else if (wsConnection) {
-    const values = objectKeys.map(key => data[key]).join(',');
-    wsConnection.send([id, ...values]);
+    const values = [id, ...objectKeys].map(key => data[key]).join(',');
+    wsConnection.send(values);
   }
 
   return id;
