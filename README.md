@@ -18,6 +18,7 @@ npm install cryptoscan-provider
 - Unique ID generation for each data entry
 - TypeScript support
 - Configurable through environment variables
+- Ability to create a custom data processing function
 
 ## Requirements
 
@@ -37,7 +38,10 @@ If not set, it defaults to `ws://localhost:8080`.
 ## Usage
 
 ```typescript
-import processData from 'cryptoscan-provider';
+import { createProcessData } from 'cryptoscan-provider';
+
+// Create a custom data processing function
+const processData = createProcessData();
 
 // Example data object
 const data = {
