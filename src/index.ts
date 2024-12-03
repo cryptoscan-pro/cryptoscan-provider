@@ -41,11 +41,16 @@ export function createProcessData() {
         types: valueTypes.join(',')
       }).toString();
 
-      wsConnection = new WebSocketReconnect(`${WS_URL}/ws?${queryParams}`);
+      wsConnection = new WebSocketReconnect(`${WS_URL}?${queryParams}`);
 
       wsConnection.on('open', () => {
+        console.log('WebSocket connection opened', WS_URL);
         const values = [id, ...Object.values(data)].join(',');
         wsConnection?.send(values);
+      })
+
+      wsConnection.on("close", () => {
+        console.log('WebSocket connection closed', WS_URL);
       })
 
       isFirstRun = false;
