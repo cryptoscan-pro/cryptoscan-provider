@@ -34,7 +34,7 @@ export function createProcessData() {
 
     if (isFirstRun) {
       objectKeys = ['id', ...Object.keys(data)];
-      valueTypes = ['string', ...objectKeys.map(k => typeof data[k])];
+      valueTypes = ['string', ...Object.values(data).map(v => typeof v)];
 
       const queryParams = new URLSearchParams({
         keys: objectKeys.join(','),
