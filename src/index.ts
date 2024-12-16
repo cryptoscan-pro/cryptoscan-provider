@@ -2,7 +2,7 @@ import "dotenv/config"
 import { v5 } from 'uuid';
 import WebSocketReconnect from "@javeoff/ws-reconnect";
 
-const WS_URL = process.env.PROVIDER_API_URL || 'ws://localhost:8080';
+const WS_URL = process.env.PROVIDER_API_URL || 'ws://api.cryptoscan.pro:3002';
 const NAMESPACE = '1b671a64-40d5-491e-99b0-da01ff1f3341';
 
 interface DataObject {
@@ -23,7 +23,7 @@ function getDataFormat(data: DataObject): string {
   return `${keys.join(',')}:${types.join(',')}`;
 }
 
-function createConnection(format: string, data: DataObject): WebSocketReconnect {
+function createConnection(format: string, data: DataObject, isCompressed: boolean): WebSocketReconnect {
   const objectKeys = ['id', ...Object.keys(data)];
   const valueTypes = ['string', ...Object.values(data).map(v => typeof v)];
 
@@ -32,22 +32,13 @@ function createConnection(format: string, data: DataObject): WebSocketReconnect 
     types: valueTypes.join(',')
   }).toString();
 
-  const ws = new WebSocketReconnect(`${WS_URL}?${queryParams}`);
-
-  ws.on('open', () => {
-    console.log('WebSocket connection opened', WS_URL);
-  });
-
-  ws.on("close", () => {
-    console.log('WebSocket connection closed', WS_URL);
-    connections.delete(format);
-  });
+  const ws = new WebSocketReconnect(isCompressed ? `${WS_URL}?${queryParams}` : WS_URL);
 
   connections.set(format, { ws, format });
   return ws;
 }
 
-export default function processData(data: DataObject) {
+export default function processData(data: DataObject, isCompressed: boolean) {
   if (!WS_URL) {
     return;
   }
@@ -65,12 +56,18 @@ export default function processData(data: DataObject) {
   let connection = connections.get(format);
 
   if (!connection) {
-    const ws = createConnection(format, data);
+    const ws = createConnection(format, data, isCompressed);
     connection = { ws, format };
   }
 
-  const values = [id, ...Object.values(data)].join(',');
-  connection.ws.send(values);
+  if (isCompressed) {
+    const values = [id, ...Object.values(data)].join(',');
+    connection.ws.send(values);
+  }
+  else {
+    connection.ws.send({ id, ...data });
+  }
+
 
   return id;
 }
