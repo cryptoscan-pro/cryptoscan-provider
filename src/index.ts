@@ -65,7 +65,7 @@ export default function processData(data: DataObject, isCompressed: boolean) {
     connection.ws.send(values);
   }
   else {
-    connection.ws.send({ id, ...data });
+    connection.ws.send(JSON.stringify(data));
   }
 
 
