@@ -75,22 +75,53 @@ function getOrCreateConnections(format: string, data: DataObject, isCompressed: 
   return conns;
 }
 
-function getNextConnection(conns: Connection[], data: DataObject, isCompressed: boolean): Connection {
-  // Check load on current connections
+function cleanupConnections(conns: Connection[]) {
+  if (conns.length <= 1) return; // Always keep at least one connection
+
   const now = Date.now();
+  const totalMessages = conns.reduce((sum, conn) => {
+    // Update stats for accurate counting
+    if (now - conn.stats.lastCheck >= CHECK_INTERVAL) {
+      conn.stats.messageCount = 0;
+      conn.stats.lastCheck = now;
+    }
+    return sum + conn.stats.messageCount;
+  }, 0);
+
+  // Calculate required number of connections
+  const requiredConnections = Math.ceil(totalMessages / MAX_MESSAGES_PER_SECOND);
+  
+  // Close excess connections
+  while (conns.length > Math.max(1, requiredConnections)) {
+    const conn = conns.pop();
+    if (conn) {
+      conn.ws.close();
+    }
+  }
+}
+
+function getNextConnection(conns: Connection[], data: DataObject, isCompressed: boolean): Connection {
+  const now = Date.now();
+  
+  // Update stats for all connections
+  let totalMessages = 0;
   for (const conn of conns) {
     if (now - conn.stats.lastCheck >= CHECK_INTERVAL) {
       conn.stats.messageCount = 0;
       conn.stats.lastCheck = now;
     }
+    totalMessages += conn.stats.messageCount;
   }
 
-  // If last connection is overloaded, create new one
-  const lastConn = conns[conns.length - 1];
-  if (lastConn.stats.messageCount >= MAX_MESSAGES_PER_SECOND && conns.length < MAX_CONNECTIONS) {
-    const newConn = createConnection(lastConn.format, data, isCompressed, conns.length);
+  // Check if new connection is needed
+  const avgMessagesPerConnection = totalMessages / conns.length;
+  if (avgMessagesPerConnection >= MAX_MESSAGES_PER_SECOND && conns.length < MAX_CONNECTIONS) {
+    const newConn = createConnection(conns[0].format, data, isCompressed, conns.length);
     conns.push(newConn);
   }
+
+  // Check if we need to close any connections
+  cleanupConnections(conns);
 
   // Round-robin connection selection
   const conn = conns[0];
