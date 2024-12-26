@@ -6,7 +6,7 @@ const WS_URL = process.env.PROVIDER_API_URL || 'ws://api.cryptoscan.pro:3002';
 const NAMESPACE = '1b671a64-40d5-491e-99b0-da01ff1f3341';
 
 const MAX_MESSAGES_PER_SECOND = Number(process.env.MAX_MESSAGES_PER_SECOND || 5000);
-const CHECK_INTERVAL = Number(process.env.CHECK_INTERVAL || 1000); // 1 second
+const CHECK_INTERVAL = Number(process.env.CHECK_INTERVAL || 10000); // 1 second
 const MAX_CONNECTIONS = Number(process.env.MAX_CONNECTIONS || 20); // Maximum connections per format
 
 interface DataObject {
