@@ -43,7 +43,9 @@ function createConnection(format: string, data: DataObject, isCompressed: boolea
     types: valueTypes.join(',')
   }).toString();
 
-  const ws = new WebSocketReconnect(isCompressed ? `${WS_URL}?${queryParams}` : WS_URL);
+  const ws = new WebSocketReconnect(isCompressed ? `${WS_URL}?${queryParams}` : WS_URL, {
+    resendOnReconnect: true,
+  });
 
   return {
     ws,
